@@ -15,50 +15,44 @@ namespace cAlgo.Indicators
         public bool ShowText { get; set; }
         #endregion Parameters
 
+
         #region Helper Functions
         /// <summary>
         /// Get all opened positions for current Symbol
         /// </summary>
         public Position[] GetSymbolOpenPositions()
-        {
-            List<Position> openPositions = new List<Position>();
-
-            foreach (Position position in Positions)
-                if (position.SymbolName == Symbol.Name)
-                    openPositions.Add(position);
-
-            return openPositions.ToArray();
-        }
+            => Positions
+                .Where(position => position.SymbolName == Symbol.Name)
+                .ToArray();
 
         /// <summary>
         /// Get all opened positions for current Symbol with Trade Type (Buy / Sell)
         /// </summary>
         public Position[] GetSymbolOpenPositions(TradeType tradeType)
-        {
-            List<Position> openPositions = new List<Position>();
-
-            foreach (Position position in Positions)
-                if (position.SymbolName == Symbol.Name && position.TradeType == tradeType)
-                    openPositions.Add(position);
-
-            return openPositions.ToArray();
-        }
+            => Positions
+                .Where(position => position.SymbolName == Symbol.Name && position.TradeType == tradeType)
+                .ToArray();
+        
 
         /// <summary>
         /// Get the Total Volume of Opened Positions
         /// </summary>
-        public double GetOpenPositionsVolume() => GetSymbolOpenPositions().Select(p => p.VolumeInUnits).Sum();
+        public double GetOpenPositionsVolume()
+            => GetSymbolOpenPositions().Select(p => p.VolumeInUnits).Sum();
 
         /// <summary>
         /// Get the Total Volume of Opened Positions with Trade Type (Buy / Sell)
         /// </summary>
-        public double GetOpenPositionsVolume(TradeType tradeType) => GetSymbolOpenPositions(tradeType).Select(p => p.VolumeInUnits).Sum();
+        public double GetOpenPositionsVolume(TradeType tradeType)
+            => GetSymbolOpenPositions(tradeType).Select(p => p.VolumeInUnits).Sum();
 
         /// <summary>
         /// Returns the Net Volume Exposure in Units
         /// </summary>
-        public double NetVolumeExposure => GetOpenPositionsVolume(TradeType.Buy) - GetOpenPositionsVolume(TradeType.Sell);
+        public double NetVolumeExposure
+            => GetOpenPositionsVolume(TradeType.Buy) - GetOpenPositionsVolume(TradeType.Sell);
         #endregion
+
 
         #region Calculate Break-Even
         // Calculate Break-Even Price for Longs or Shorts
@@ -145,15 +139,11 @@ namespace cAlgo.Indicators
         #endregion
 
         public override void Calculate(int index) {}
+
         protected override void Initialize()
         {
             CallEvents();
             Timer.Start(1);
-        }
-
-        protected override void OnTimer()
-        {
-            DrawAverageEntry();
         }
 
         #region Events
@@ -171,41 +161,32 @@ namespace cAlgo.Indicators
         }
 
         public void RemoveObjects()
-        {
-            var cobjects = Chart.Objects.Where(o => o.Name.StartsWith(TAG)).ToList();
-            foreach (var cobj in cobjects)
-                Chart.RemoveObject(cobj.Name);
-        }
+            => Chart.Objects
+                .Where(o => o.Name.StartsWith(TAG))
+                .ToList()
+                .ForEach(obj => Chart.RemoveObject(obj.Name));
+        
+
+        protected override void OnTimer()
+            => DrawAverageEntry();
 
         private void OnChartScrollChanged(ChartScrollEventArgs _)
-        {
-            RemoveObjects();
-        }
+            => RemoveObjects();
 
         private void OnChartSizeChanged(ChartSizeEventArgs _)
-        {
-            RemoveObjects();
-        }
+            => RemoveObjects();
 
         private void OnChartZoomChanged(ChartZoomEventArgs _)
-        {
-            RemoveObjects();
-        }
+            => RemoveObjects();
 
         private void OnPositionsClosed(PositionClosedEventArgs _)
-        {
-            RemoveObjects();
-        }
+            => RemoveObjects();
 
         private void OnPositionsModified(PositionModifiedEventArgs _)
-        {
-            RemoveObjects();
-        }
+            => RemoveObjects();
 
         private void OnPositionsOpened(PositionOpenedEventArgs _)
-        {
-            RemoveObjects();
-        }
+            => RemoveObjects();
 
         #endregion Events
     }
